@@ -34,3 +34,27 @@ def align_fundamentals_to_prices(fund_df, daily_index, tickers):
     return fund_df.reindex(
         pd.MultiIndex.from_product([daily_index, tickers], names = ['date', 'ticker']))
 
+
+def build_fundamental_features(fund_df):
+    """
+    Normalize fundamental features using same cross-sectional z-score approach.
+    """
+
+    if fund_df.empty:
+        return fund_df
+    
+    # Select numeric columns and apply per-date winsorization + z-score
+    numeric_cols = ['gm', 'om', 'rev_ttm_yoy', 'eps_ttm_yoy', 'market_cap']
+    for col in numeric_cols:
+        if col in fund_df.columns:
+            # Per-date winsorization
+            lower = fund_df.groupby(level = 'date')[col].transform(lambda x: x.quantile(0.01))
+            upper = fund_df.groupby(level = 'date')[col].transform(lambda x: x.quantile(0.99))
+            fund_df[col] = fund_df[col].clip(lower = lower, upper = upper)
+
+            # Per-date z-score
+            mean = fund_df.groupby(level = 'date')[col].transform('mean')
+            std = fund_df.groupby(level = 'date')[col].transform('std')
+            fund_df[col] = (fund_df[col] - mean) / (std + 1e-9)
+
+    return fund_df
