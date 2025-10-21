@@ -1,6 +1,6 @@
-# Cross-Sectional Alpha Factory (Machine Learning Stock Predictor)
+# Cross-Sectional Alpha Factory
 
-This is my personal project to build a **machine learning model** that predicts which stocks will perform better or worse than average **next week** — and then forms a **sector-neutral long/short portfolio**.
+This is my personal project to build a **machine learning model** that predicts which stocks will perform better or worse than average **next week** and then forms a **sector-neutral long/short portfolio**.
 
 My goal is to **learn end-to-end quantitative research**:
 - how to collect and clean financial data
@@ -22,19 +22,6 @@ This project will include:
 4. **Backtesting engine**  
 5. **Performance visualization** (equity curve, IC, deciles)  
 6. **Explainability** (SHAP feature importance)  
-
----
-
-## Planned Phases
-
-| Phase | Description | Status |
-|-------|--------------|--------|
-| 1 | Collect stock price data | 🔜 |
-| 2 | Engineer predictive features | 🔜 |
-| 3 | Train ML model | 🔜 |
-| 4 | Build portfolio + backtest | 🔜 |
-| 5 | Analyze and visualize | 🔜 |
-| 6 | Create interactive dashboard | 🔜 |
 
 ---
 
