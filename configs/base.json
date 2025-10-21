@@ -1,0 +1,9 @@
+{
+  "start_date": "2015-01-01",
+  "end_date": null,
+  "rebalance_weekday": 4,
+  "one_way_cost_bps": 5,
+  "top_bottom_pct": 0.15,
+  "weight_cap": 0.02,
+  "lookback_days": 756
+}
