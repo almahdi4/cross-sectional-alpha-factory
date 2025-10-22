@@ -34,6 +34,12 @@ fund_features = build_fundamental_features(aligned_fund)
 print("✅ Normalized fundamentals:", fund_features.shape)
 
 
+
+price_features.index = price_features.index.set_names(['date', 'ticker']) 
+fund_features.index = fund_features.index.set_names(['date', 'ticker'])
+
+
+
 combined = price_features.join(fund_features, how="left")
 print("✅ Combined dataset shape:", combined.shape)
 
