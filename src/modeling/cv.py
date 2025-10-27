@@ -5,7 +5,7 @@ import pandas as pd
 class PurgedKFold(BaseCrossValidator):
     """
     Purged K-Fold CV with embargo for time-series data.
-    Prevents leakage from overlapping label windown.
+    Prevents leakage from overlapping label windows.
     """
 
     def __init__(self, n_splits = 5, embargo_days = 5):
@@ -15,7 +15,7 @@ class PurgedKFold(BaseCrossValidator):
     def split(self, X, y = None, groups = None):
         """
         Generate train/val indices for each fold.
-        X must have DatatimeIndex at level 0 (date).
+        X must have DatetimeIndex at level 0 (date).
         """
         # Get unique dates and sort them
         unique_dates = X.index.get_level_values(0).unique().sort_values()
@@ -38,5 +38,5 @@ class PurgedKFold(BaseCrossValidator):
 
             yield train_idx, val_idx
 
-        def get_n_splits(self, X = None, y = None, groups = None):
-            return self.n_splits
+    def get_n_splits(self, X = None, y = None, groups = None):
+        return self.n_splits
