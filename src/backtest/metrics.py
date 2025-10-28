@@ -26,7 +26,8 @@ def summarize_performance(backtest_result):
 
     return {
         'ann_return': ann_return, 
-        'ann_vol' : sharpe,
+        'ann_vol' : ann_vol,
+        'sharpe' : sharpe,
         'max_drawdown' : max_drawdown,
         'avg_turnover' : avg_turnover,
         'num_periods' : len(returns),
@@ -47,13 +48,13 @@ def plot_equity_curve(backtest_result, output_path):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (12, 8), sharex = True)
 
     # Plot equity curve
-    ax1.plot(equity.index, equity.values, linewidth = 2, colour = '#2E86AB')
+    ax1.plot(equity.index, equity.values, linewidth = 2, color = '#2E86AB')
     ax1.set_ylabel('Equity ($)', fontsize = 12)
     ax1.set_title('Portfolio Equity Curve', fontsize = 14, fontweight = 'bold')
     ax1.grid(True, alpha = 0.3)
 
     # Plot drawdown
-    ax2.fill_between(drawdown.index, 0, drawdown.values, colour = '#A23B72', alpha = 0.7)
+    ax2.fill_between(drawdown.index, 0, drawdown.values, color = '#A23B72', alpha = 0.7)
     ax2.set_ylabel('Drawdown (%)', fontsize = 12)
     ax2.set_xlabel('Date', fontsize = 12)
     ax2.grid(True, alpha = 0.3)
@@ -81,7 +82,7 @@ def plot_deciles(predictions, realized_returns, output_path):
 
     # Plot bar chart
     fig, ax = plt.subplots(figsize = (10, 6))
-    ax.bar(decile_returns.index, decile_returns.values, colour = '#06A77D', alpha = 0.8)
+    ax.bar(decile_returns.index, decile_returns.values, color = '#06A77D', alpha = 0.8)
     ax.set_xlabel('Prediction Decile', fontsize = 12)
     ax.set_ylabel('Average Realized Return', fontsize = 12)
     ax.set_title('Return by Prediction Decile (Monotonicity Check)', fontsize = 14, fontweight = 'bold')
@@ -110,11 +111,11 @@ def plot_ic_timeseries(predictions, realized_returns, output_path):
 
     # Plot IC timeseries
     fig, ax = plt.subplots(figsize = (12, 6))
-    ax.plot(ic_by_date.index, ic_by_date.values, linewidth = 1.5, colour = '#F18f01', alpha = 0.7)
+    ax.plot(ic_by_date.index, ic_by_date.values, linewidth = 1.5, color = '#F18f01', alpha = 0.7)
     ax.axhline(0, color = 'black', linestyle = '--', linewidth = 1)
     ax.set_ylabel('Information Coefficient', fontsize = 12)
     ax.set_xlabel('Date', fontsize = 12)
-    ax.set_title('Rolling Information Coefficient (Prediciton vs. Realized Returns)', fontsize = 14, fontweight = 'bold')
+    ax.set_title('Rolling Information Coefficient (Prediction vs. Realized Returns)', fontsize = 14, fontweight = 'bold')
     ax.grid(True, alpha = 0.3)
 
     plt.tight_layout()
