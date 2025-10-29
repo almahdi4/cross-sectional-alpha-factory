@@ -9,45 +9,72 @@ def weekly_rebalance_dates(index, weekday = 4):
 
     return index[index.weekday == weekday]
 
-def build_sector_neutral_weights(scores, sector_map, top_bottom_pct = 0.15, cap = 0.02):
+import pandas as pd
+import numpy as np
+
+def build_sector_neutral_weights(scores, sector_map, top_bottom_pct=0.15, cap=0.02):
     """
     Convert model scores to sector-neutral long/short weights.
 
     Args:
-    scores: Serties with MultiIndex (date, ticker) of model predictions
-    sector_map: DataFrame with columns [ticker, sector]
-    top_bottom_pct: Keep top/bottom 15% of stocks (0.15)
-    cap: Maximum weight per position (0.02 = 2%)
+        scores: Series with MultiIndex (date, ticker) of model predictions
+        sector_map: DataFrame with columns ['ticker', 'sector']
+        top_bottom_pct: Keep only top/bottom % of names (e.g. 0.15 = top 15%, bottom 15%)
+        cap: Max absolute weight per stock (0.02 = 2%)
+
+    Returns:
+        Series with MultiIndex (date, ticker) of portfolio weights
     """
 
-    # Rank scores to [-1. 1] per date (cross-sectional ranking)
-    ranks = scores.groupby(level = 0).rank(pct=True) * 2 - 1
+    # 1. Rank scores cross-sectionally each day to [-1, 1]
+    #    rank(pct=True) -> [0,1], then *2-1 -> [-1,1]
+    ranks = scores.groupby(level=0).rank(pct=True) * 2 - 1
 
-    # Keep only extreme tails (top 15% and bottom 15%)
-    top_threshold = 1 - 2 * top_bottom_pct # 0.70 for top 15%
-    bottom_threshold = -1 + 2 * top_bottom_pct # -0.70 for bottom 15%
+    # 2. Keep only the extreme tails
+    #    Example: top_bottom_pct = 0.15 keeps top 15% and bottom 15%
+    top_threshold = 1 - 2 * top_bottom_pct      # e.g. 1 - 0.30 = 0.70
+    bottom_threshold = -1 + 2 * top_bottom_pct  # e.g. -1 + 0.30 = -0.70
 
-    # Zero out middle 70% (only keep extreme scores)
     weights = ranks.copy()
-    weights[(weights > bottom_threshold) & (weights < top_threshold)] = 0
+    # zero out the middle ~70%
+    middle_mask = (weights > bottom_threshold) & (weights < top_threshold)
+    weights[middle_mask] = 0
 
-    # Convert to DataFrame and add sectore information
-    weights_df = weights.reset_index()
-    weights_df = weights_df.merge(sector_map, on = 'ticker', how = 'left')
-    weights_df = weights_df.set_index(['date', 'ticker'])
+    # 3. Turn it into a DataFrame and attach sector info
+    weights_df = (
+        weights
+        .rename("weight")        # <-- give the column a real name
+        .reset_index()           # columns: ['date', 'ticker', 'weight']
+        .merge(sector_map, on="ticker", how="left")  # add 'sector'
+        .set_index(["date", "ticker"])
+    )
+    # now weights_df has columns: ['weight', 'sector']
 
-    # Sector-demean: subtract sector average from each stock's weight
-    sector_means = weights_df.groupby(['date', 'sector'])[0].transform('mean')
-    weights_df[0] = weights_df[0] - sector_means
+    # 4. Sector neutralization:
+    #    subtract each (date, sector)'s average weight from individual stock weights
+    sector_means = (
+        weights_df
+        .groupby(["date", "sector"])["weight"]
+        .transform("mean")
+    )
+    weights_df["weight"] = weights_df["weight"] - sector_means
 
-    # Cap individual positions at +/- 2%
-    weights_df[0] = weights_df[0].clip(-cap, cap)
+    # 5. Cap individual positions at +/- cap (e.g. +/-2%)
+    weights_df["weight"] = weights_df["weight"].clip(-cap, cap)
 
-    # Normalize so total gross exposure = 1 (sum of absolute values = 1)
-    gross_exposure = weights_df.groupby('date')[0].transform(lambda x: x.abs().sum())
-    weights_df[0] = weights_df[0] / gross_exposure
+    # 6. Normalize so total gross exposure per date = 1
+    #    gross exposure = sum(|weights|) for that date
+    gross_exposure = (
+        weights_df
+        .groupby("date")["weight"]
+        .transform(lambda x: x.abs().sum())
+    )
+    weights_df["weight"] = weights_df["weight"] / (gross_exposure.replace(0, np.nan))
 
-    return weights_df[0]
+    # 7. Return a clean Series with MultiIndex (date, ticker)
+    final_weights = weights_df["weight"]
+    return final_weights
+
 
 def backtest_portfolio(prices, weights, costs_bps = 5):
     """
