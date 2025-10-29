@@ -9,9 +9,6 @@ def weekly_rebalance_dates(index, weekday = 4):
 
     return index[index.weekday == weekday]
 
-import pandas as pd
-import numpy as np
-
 def build_sector_neutral_weights(scores, sector_map, top_bottom_pct=0.15, cap=0.02):
     """
     Convert model scores to sector-neutral long/short weights.
