@@ -1,6 +1,9 @@
 .venv/
 __pycache__/
 *.pyc
-reports/*
-!.gitkeep
-plots/
+
+# Ignore everything in reports/, except the plots subfolder (and .gitkeep)
+reports/**
+!reports/.gitkeep
+!reports/plots/**
+
