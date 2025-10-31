@@ -53,5 +53,48 @@ I’m building this from scratch to truly understand:
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 This project is **for educational purposes only**. It is *not* financial advice.
+
+---
+
+## Backtest Diagnostics
+
+This project includes a realistic walk-forward backtest with weekly portfolio rebalancing, sector neutrality, and transaction costs. Below are the model’s diagnostic plots and performance summary.
+
+---
+
+### Equity Curve
+![Equity Curve](reports/plots/equity_curve.png)
+
+### Information Coefficient (IC) Over Time
+![IC Timeseries](reports/plots/ic_timeseries.png)
+
+### Decile Spread Test
+Higher predictions → higher returns?  
+(Shows whether the model ranks stocks correctly)
+
+![Decile Plot](reports/plots/deciles.png)
+
+---
+
+### Performance Summary
+
+| Metric | Value |
+|--------|------|
+| Annualized Return | _TBD_ |
+| Annualized Volatility | _TBD_ |
+| Sharpe Ratio | _TBD_ |
+| Max Drawdown | _TBD_ |
+| Average Weekly Turnover | _TBD_ |
+| Test Period Length | _TBD_ |
+
+> These results indicate whether the factor model provides predictive power across stocks and holds up under real out-of-sample testing conditions.
+
+---
+
+### How to Reproduce
+
+```bash
+python run.py
+
