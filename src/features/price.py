@@ -68,19 +68,41 @@ def xsection_normalize(df):
     Winsorize and z-score features per date (cross-sectional normalization).
     This makes features comparable across different dates.
     """
-
-    def normalize_date(group):
-        # Winsorize: cap extreme values at 1st and 99th percentile
-        lower = group.quantile(0.01)
-        upper = group.quantile(0.99)
-        group = group.clip(lower = lower, upper = upper, axis = 1)
-
-        # Z-score: (value - mean) / std_dev for each feature
-        mean = group.mean()
-        std = group.std()
-        return (group - mean) / (std + 1e-9) # + 1e-9 prevents division by zero
+    # Make a copy to avoid SettingWithCopyWarning
+    result = df.copy()
     
-    return df.groupby(level = 0).apply(normalize_date)
+    # Get unique dates
+    dates = df.index.get_level_values(0).unique()
+    
+    # Normalize each column (feature) separately
+    for col in df.columns:
+        for date in dates:
+            # Get mask for this date
+            mask = df.index.get_level_values(0) == date
+            
+            # Get data for this date and column
+            col_data = df.loc[mask, col].copy()
+            
+            # Skip if all NaN or insufficient data
+            if col_data.isna().all() or len(col_data.dropna()) < 2:
+                continue
+            
+            # Winsorize at 1st and 99th percentile
+            lower = col_data.quantile(0.01)
+            upper = col_data.quantile(0.99)
+            col_data = col_data.clip(lower=lower, upper=upper)
+            
+            # Z-score normalization
+            mean = col_data.mean()
+            std = col_data.std()
+            
+            if std > 1e-9:  # Only normalize if std is not zero
+                col_data = (col_data - mean) / std
+            
+            # Assign back to result using .loc
+            result.loc[mask, col] = col_data.values
+    
+    return result
 
 def build_labels(prices):
     """
