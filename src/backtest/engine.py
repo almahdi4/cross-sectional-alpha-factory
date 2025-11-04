@@ -12,65 +12,44 @@ def weekly_rebalance_dates(index, weekday = 4):
 def build_sector_neutral_weights(scores, sector_map, top_bottom_pct=0.15, cap=0.02):
     """
     Convert model scores to sector-neutral long/short weights.
-
-    Args:
-        scores: Series with MultiIndex (date, ticker) of model predictions
-        sector_map: DataFrame with columns ['ticker', 'sector']
-        top_bottom_pct: Keep only top/bottom % of names (e.g. 0.15 = top 15%, bottom 15%)
-        cap: Max absolute weight per stock (0.02 = 2%)
-
-    Returns:
-        Series with MultiIndex (date, ticker) of portfolio weights
     """
-
-    # 1. Rank scores cross-sectionally each day to [-1, 1]
-    #    rank(pct=True) -> [0,1], then *2-1 -> [-1,1]
+    # Rank scores to [-1, 1] per date (cross-sectional ranking)
     ranks = scores.groupby(level=0).rank(pct=True) * 2 - 1
-
-    # 2. Keep only the extreme tails
-    #    Example: top_bottom_pct = 0.15 keeps top 15% and bottom 15%
-    top_threshold = 1 - 2 * top_bottom_pct      # e.g. 1 - 0.30 = 0.70
-    bottom_threshold = -1 + 2 * top_bottom_pct  # e.g. -1 + 0.30 = -0.70
-
+    
+    # Keep only extreme tails (top 15% and bottom 15%)
+    top_threshold = 1 - 2 * top_bottom_pct  # 0.70 for top 15%
+    bottom_threshold = -1 + 2 * top_bottom_pct  # -0.70 for bottom 15%
+    
+    # Zero out middle stocks
     weights = ranks.copy()
-    # zero out the middle ~70%
-    middle_mask = (weights > bottom_threshold) & (weights < top_threshold)
-    weights[middle_mask] = 0
+    weights[(weights > bottom_threshold) & (weights < top_threshold)] = 0
+    
+    # Convert to DataFrame with proper column name
+    weights_df = weights.reset_index()
+    weights_df.columns = ['date', 'ticker', 'weight']
+    
+    # Merge with sector information
+    weights_df = weights_df.merge(sector_map[['ticker', 'sector']], on='ticker', how='left')
+    
+    # Fill missing sectors with 'Unknown'
+    weights_df['sector'] = weights_df['sector'].fillna('Unknown')
+    
+    # Set index for groupby operations
+    weights_df = weights_df.set_index(['date', 'ticker'])
+    
+    # Sector-demean: subtract sector average from each stock's weight
+    sector_means = weights_df.groupby(['date', 'sector'])['weight'].transform('mean')
+    weights_df['weight'] = weights_df['weight'] - sector_means
+    
+    # Cap individual positions at +/- cap (2%)
+    weights_df['weight'] = weights_df['weight'].clip(-cap, cap)
+    
+    # Normalize so total gross exposure = 1
+    gross_exposure = weights_df.groupby('date')['weight'].transform(lambda x: x.abs().sum())
+    weights_df['weight'] = weights_df['weight'] / (gross_exposure + 1e-9)  # Avoid division by zero
+    
+    return weights_df['weight']
 
-    # 3. Turn it into a DataFrame and attach sector info
-    weights_df = (
-        weights
-        .rename("weight")        # <-- give the column a real name
-        .reset_index()           # columns: ['date', 'ticker', 'weight']
-        .merge(sector_map, on="ticker", how="left")  # add 'sector'
-        .set_index(["date", "ticker"])
-    )
-    # now weights_df has columns: ['weight', 'sector']
-
-    # 4. Sector neutralization:
-    #    subtract each (date, sector)'s average weight from individual stock weights
-    sector_means = (
-        weights_df
-        .groupby(["date", "sector"])["weight"]
-        .transform("mean")
-    )
-    weights_df["weight"] = weights_df["weight"] - sector_means
-
-    # 5. Cap individual positions at +/- cap (e.g. +/-2%)
-    weights_df["weight"] = weights_df["weight"].clip(-cap, cap)
-
-    # 6. Normalize so total gross exposure per date = 1
-    #    gross exposure = sum(|weights|) for that date
-    gross_exposure = (
-        weights_df
-        .groupby("date")["weight"]
-        .transform(lambda x: x.abs().sum())
-    )
-    weights_df["weight"] = weights_df["weight"] / (gross_exposure.replace(0, np.nan))
-
-    # 7. Return a clean Series with MultiIndex (date, ticker)
-    final_weights = weights_df["weight"]
-    return final_weights
 
 
 def backtest_portfolio(prices, weights, costs_bps = 5):
