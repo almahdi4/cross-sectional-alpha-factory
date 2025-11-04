@@ -2,8 +2,9 @@
 __pycache__/
 *.pyc
 
-# Ignore everything in reports/, except the plots subfolder (and .gitkeep)
-reports/**
-!reports/.gitkeep
-!reports/plots/**
+# Keep reports folder in the repo but ignore “big”/temporary stuff by default
+reports/*
+!reports/*.png
+!reports/*.json
+!.gitkeep
 
