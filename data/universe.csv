@@ -1,16 +1,51 @@
 ticker,sector
 AAPL,Information Technology
 MSFT,Information Technology
-AMZN,Consumer Discretionary
 GOOGL,Communication Services
-META,Communication Services
+AMZN,Consumer Discretionary
 NVDA,Information Technology
+META,Communication Services
+TSLA,Consumer Discretionary
 BRK-B,Financials
 JPM,Financials
-XOM,Energy
 JNJ,Health Care
 V,Information Technology
-HD,Consumer Discretionary
 PG,Consumer Staples
+HD,Consumer Discretionary
+XOM,Energy
 UNH,Health Care
 MA,Information Technology
+BAC,Financials
+ABBV,Health Care
+COST,Consumer Staples
+WMT,Consumer Staples
+DIS,Communication Services
+NFLX,Communication Services
+ADBE,Information Technology
+CRM,Information Technology
+CSCO,Information Technology
+PEP,Consumer Staples
+KO,Consumer Staples
+NKE,Consumer Discretionary
+INTC,Information Technology
+AMD,Information Technology
+CMCSA,Communication Services
+VZ,Communication Services
+TMO,Health Care
+CVX,Energy
+ABT,Health Care
+ORCL,Information Technology
+MRK,Health Care
+WFC,Financials
+LLY,Health Care
+AVGO,Information Technology
+PM,Consumer Staples
+BMY,Health Care
+NEE,Utilities
+UNP,Industrials
+LIN,Materials
+RTX,Industrials
+HON,Industrials
+UPS,Industrials
+SCHW,Financials
+GS,Financials
