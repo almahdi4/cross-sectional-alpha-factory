@@ -7,4 +7,4 @@ reports/*
 !reports/*.png
 !reports/*.json
 !.gitkeep
-
+!reports/*.csv
