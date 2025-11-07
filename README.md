@@ -87,6 +87,15 @@ This project runs a realistic walk-forward backtest with weekly portfolio rebala
 
 ---
 
+## Key Achievements
+
+- **7,890 out-of-sample predictions** across 546 weekly rebalances (2015-2025)
+- **Purged K-Fold CV** prevents temporal data leakage
+- **Sector-neutral portfolio** construction with transaction cost modeling
+- **Complete ML pipeline** from data loading → feature engineering → training → backtesting → visualization
+
+---
+
 ### Reproduce Locally
 
 ```bash
