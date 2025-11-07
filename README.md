@@ -79,6 +79,49 @@ This project runs a realistic walk-forward backtest with weekly portfolio rebala
 
 ---
 
+## Model Explainability
+
+### SHAP Feature Importance
+
+![SHAP Summary](reports/shap_summary.png)
+
+**Key Insights:**
+- **ret_10 (10-day momentum)** has the widest impact spread → strongest predictive signal
+- **High momentum (red dots)** pushes predictions positive, **low momentum (blue)** pushes negative
+- **vol_21** shows mixed impacts → acts as risk moderator rather than standalone predictor
+- **month_end** has minimal effect → calendar effects are weak
+
+![Feature Importance](reports/feature_importance.png)
+
+**Top Features by LightGBM Gain:**
+1. **ret_63** - Long-term momentum (most used in splits)
+2. **ret_10** - Medium-term momentum  
+3. **beta_60** - Market exposure adjustment
+4. **idio_vol_60** - Stock-specific risk
+5. **vol_5** - Short-term volatility
+
+### Ablation Study Results
+
+**Finding:** No single feature is critical (all impacts < 0.05 Sharpe).
+
+**What this means:**
+- Model uses **ensemble of weak signals** (robust, less overfitting risk)
+- Removing any one feature doesn't break performance
+- Signals are partially redundant → adding orthogonal features (fundamentals, sentiment) would improve diversity
+
+See full analysis: [ablation_results.csv](reports/ablation_results.csv)
+
+---
+
+### Why Sharpe is Negative Despite Working Features
+
+SHAP confirms momentum **does predict direction correctly** (proper blue-left/red-right patterns). However:
+
+- Signal magnitude is weak (±0.01 to ±0.03 per feature)
+- Weekly turnover (19%) × transaction costs (5 bps) = 50 bps/week drag
+- Even with 2.5% annual edge, costs overwhelm alpha
+
+---
 ## Key Achievements
 
 - **24000+ out-of-sample predictions** across 546 weekly rebalances (2015-2025)
