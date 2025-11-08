@@ -30,6 +30,7 @@ A sector-neutral stock prediction system combining momentum and fundamental sign
 
 ### Model Pipeline
 
+```
 Data Download (yfinance)
 ↓
 Feature Engineering (14 features)
@@ -45,6 +46,7 @@ Sector-Neutral Portfolio Construction (long/short)
 Realistic Backtest (transaction costs, weekly rebalancing)
 ↓
 Performance Analysis + SHAP Explainability
+```
 
 ---
 
