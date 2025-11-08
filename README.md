@@ -22,7 +22,7 @@ A sector-neutral stock prediction system combining momentum and fundamental sign
 
 **Baseline (momentum-only):** Sharpe -0.71, Annual Return -2.8%, Max DD -28.7%
 
-**Current (momentum + fundamentals):** Model successfully identifies winners (Decile 10 outperforms) but struggles on short side—a common challenge in equity markets due to structural long bias.
+**Current (momentum + fundamentals):** Model successfully identifies winners (Decile 10 outperforms) but struggles on short side, a common challenge in equity markets due to structural long bias.
 
 ---
 
@@ -104,7 +104,7 @@ See full analysis: [ablation_results.csv](reports/ablation_results.csv)
 ![Equity Curve](reports/equity_curve.png)
 ![Decile Spread](reports/deciles.png)
 
-**Decile Analysis:** Model correctly identifies winners (Decile 10 outperforms) but short side underperforms—typical in equity markets with structural long bias.
+**Decile Analysis:** Model correctly identifies winners (Decile 10 outperforms) but short side underperforms, typical in equity markets with structural long bias.
 
 **IC Time Series:** Prediction accuracy varies by regime (positive IC in trending markets, negative in choppy markets).
 
@@ -270,9 +270,9 @@ Contributions welcome! Areas of interest:
 
 ## Contact
 
-For questions or collaboration: [mahdialrubaiy1@gmail.com]
+For questions or collaboration: mahdialrubaiy1@gmail.com
 
-**Built by:** [Mahdi Al-Rubaiy]  
+**Built by:** Mahdi Al-Rubaiy
 **Year:** 2025  
 **Purpose:** Demonstrating production-ready quantitative finance ML engineering
 
