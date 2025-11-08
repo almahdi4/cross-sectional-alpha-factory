@@ -6,7 +6,7 @@ from lightgbm import LGBMRegressor
 
 from src.data.loaders import load_universe, load_prices_volume
 from src.features.price import build_price_features, build_labels, xsection_normalize
-from src.features.fundamentals import load_fundamentals_csv, align_fundamentals_to_prices, build_fundamental_features
+from src.features.fundamentals import download_fundamentals, align_fundamentals_to_prices, build_fundamental_features
 from src.features.calendar_features import build_calendar_features
 from src.modeling.lgbm import train_predict_walkforward
 from src.backtest.engine import weekly_rebalance_dates, build_sector_neutral_weights, backtest_portfolio
@@ -52,17 +52,22 @@ def main():
 
     print(f"Rebalance dates: {len(rebal_dates)} Fridays")
     
-    # Load fundamentals (if file exists)
-    print("\n[4/7] Loading fundamentals...")
-    fund_path = BASE / "data" / "fundamentals.csv"
-    if fund_path.exists():
-        fund = load_fundamentals_csv(fund_path)
+    # Download and integrate fundamental features
+    print("\n[4/7] Downloading fundamental features...")
+    from src.features.fundamentals import download_fundamentals, align_fundamentals_to_prices, build_fundamental_features
+    
+    fund = download_fundamentals(tickers, start, end)
+    
+    if not fund.empty:
         fund = align_fundamentals_to_prices(fund, prices.index, tickers)
         fund = build_fundamental_features(fund)
-        feat = pd.concat([feat, fund], axis=1)  # CHANGED: use concat
-        print(f"Added fundamental features")
+        
+        # Merge with existing features
+        feat = pd.concat([feat, fund], axis=1)
+        print(f"Added {len(fund.columns)} fundamental features: {list(fund.columns)}")
     else:
-        print(f"No fundamentals.csv found, skipping")
+        print(f"No fundamental data available, continuing with price features only")
+
     
     # Calendar features
     print("\n[5/7] Building calendar features...")
@@ -75,7 +80,7 @@ def main():
     feat = xsection_normalize(feat)
     
     # Align features and labels to rebalance dates only
-    print(f"\n  Aligning to rebalance dates...")
+    print(f"\n Aligning to rebalance dates...")
     feat_rebal = feat.loc[feat.index.get_level_values(0).isin(rebal_dates)].copy()
     labels_rebal = labels.loc[labels.index.get_level_values(0).isin(rebal_dates)].copy()
 
