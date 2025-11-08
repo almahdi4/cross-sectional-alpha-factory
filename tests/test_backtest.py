@@ -1,6 +1,11 @@
 import numpy as np
+import sys
+from datetime import datetime
 import pandas as pd
 from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.backtest.engine import (
     weekly_rebalance_dates,
@@ -162,5 +167,49 @@ def test_backtest_pipeline():
     print("Backtest smoke test completed.")
 
 
+def test_transaction_costs_applied():
+    """Test that transaction costs reduce returns"""
+    # Create simple upward-trending prices
+    dates = pd.date_range('2024-01-01', '2024-01-10', freq='D')
+    prices = pd.DataFrame({
+        'AAPL': np.linspace(100, 110, len(dates)),  # stocks go up 10%
+        'MSFT': np.linspace(100, 110, len(dates))
+    }, index=dates)
+    
+    # Create weights that change every day (high turnover)
+    weights_list = []
+    for i, date in enumerate(dates):
+        # Alternate between favoring AAPL and MSFT
+        if i % 2 == 0:
+            weights_list.append((date, 'AAPL', 0.5))
+            weights_list.append((date, 'MSFT', -0.5))
+        else:
+            weights_list.append((date, 'AAPL', -0.5))
+            weights_list.append((date, 'MSFT', 0.5))
+    
+    weights_df = pd.DataFrame(weights_list, columns=['date', 'ticker', 'weight'])
+    weights = weights_df.set_index(['date', 'ticker'])['weight']
+    
+    # Run backtest WITH transaction costs
+    result_with_costs = backtest_portfolio(prices, weights, costs_bps=5)
+    
+    # Run backtest WITHOUT transaction costs
+    result_no_costs = backtest_portfolio(prices, weights, costs_bps=0)
+    
+    # Final equity with costs should be LOWER than without costs
+    final_equity_with_costs = result_with_costs['equity'].iloc[-1]
+    final_equity_no_costs = result_no_costs['equity'].iloc[-1]
+    
+    assert final_equity_with_costs < final_equity_no_costs, \
+        f"Transaction costs should reduce returns: {final_equity_with_costs:.4f} >= {final_equity_no_costs:.4f}"
+    
+    print(f"\n✓ Transaction cost test passed:")
+    print(f"  Final equity WITHOUT costs: {final_equity_no_costs:.4f}")
+    print(f"  Final equity WITH costs: {final_equity_with_costs:.4f}")
+    print(f"  Cost drag: {final_equity_no_costs - final_equity_with_costs:.4f}")
+
+
 if __name__ == "__main__":
     test_backtest_pipeline()
+    print("\n" + "="*60)
+    test_transaction_costs_applied()
