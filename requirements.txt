@@ -11,3 +11,5 @@ lxml==5.2.1
 scipy==1.13.1
 streamlit==1.37.1
 shap>=0.42.0
+plotly>=5.17.0
+pillow>=10.0.0
