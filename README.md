@@ -237,8 +237,7 @@ Ranked by expected ROI:
 
 1. **Hyperparameter tuning** (RandomizedSearchCV) → +0.1 to +0.2 Sharpe
 2. **Alternative data** (sentiment, Google Trends) → +0.05 to +0.15 Sharpe
-3. **Regime detection** (switch models based on market conditions) → +0.1 Sharpe
-4. **Ensemble methods** (stack LightGBM + XGBoost + Random Forest) → +0.02 to +0.05 Sharpe
+3. **Ensemble methods** (stack LightGBM + XGBoost + Random Forest) → +0.02 to +0.05 Sharpe
 
 ---
 
